@@ -14,10 +14,7 @@ def eval_model(net_params):
     model = net_builder.make_model(net_params)
     if CUDA_:
         model.cuda()
-
-    
-    batch_size = 64 
-    
+    batch_size = 64
     # setup our dataloaders
     train_loader = utils.data.DataLoader(
         datasets.MNIST('./data', train=True, download=False,
