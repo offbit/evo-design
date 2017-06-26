@@ -15,7 +15,7 @@ LAYER_SPACE['activation'] =\
 
 
 NET_SPACE = dict()
-NET_SPACE['nb_layers'] = (1, 4, 'int', 0.5)
+NET_SPACE['nb_layers'] = (1, 4, 'int', 0.1)
 NET_SPACE['lr'] = (0.0005, 0.2, 'float', 0.2)
 NET_SPACE['weight_decay'] = (0.00005, 0.002, 'float', 0.2)
 NET_SPACE['optimizer'] =\

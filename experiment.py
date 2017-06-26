@@ -8,14 +8,14 @@ CUDA_ = True
 
 if __name__=='__main__':
     # setup a tournament!
-    nb_evolution_steps = 3
+    nb_evolution_steps = 10
     tournament = \
         gp.TournamentOptimizer(
-            population_sz=10,
+            population_sz=50,
             init_fn=net_builder.randomize_network,
             mutate_fn=net_builder.mutate_net,
-            eval_fn=None,
-            nb_workers=2)
+            nb_workers=3,
+            use_cuda=True)
 
     for i in range(nb_evolution_steps):
         print('\nEvolution step:{}'.format(i))

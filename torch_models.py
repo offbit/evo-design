@@ -24,7 +24,7 @@ class Flatten(nn.Module):
 
 class CustomModel():
 
-    def __init__(self, build_info):
+    def __init__(self, build_info, CUDA=True):
 
         previous_units = 28 * 28
         self.model = nn.Sequential()
@@ -88,14 +88,19 @@ class CustomModel():
                                 weight_decay=build_info['weight_decay']['val'],
                                 momentum=0.9)
         self.optimizer = optimizer
+        self.cuda = False
+        if CUDA:
+            self.model.cuda()
+            self.cuda = True
         
     
-    def train(self, train_loader, max_batches=100, CUDA=False):
+    def train(self, train_loader, max_batches=100):
         """Train for 1 epoch."""
         self.model.train()
+
         batch = 0
         for batch_idx, (data, target) in enumerate(train_loader):
-            if CUDA:
+            if self.cuda:
                 data, target = data.cuda(), target.cuda()
             data, target = Variable(data), Variable(target)
             self.optimizer.zero_grad()
@@ -124,7 +129,7 @@ class CustomModel():
         test_loss = 0
         correct = 0
         for data, target in test_loader:
-            if CUDA:
+            if self.cuda:
                 data, target = data.cuda(), target.cuda()
             data, target = Variable(data, volatile=True), Variable(target)
             output = self.model(data)

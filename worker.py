@@ -6,17 +6,18 @@ import net_builder
 
 # helper class for scheduling workers
 class Scheduler:
-    def __init__(self, workerids):
+    def __init__(self, workerids, use_cuda):
         self._queue = Queue()
         self.workerids = workerids
         self._results = Queue()
+        self.use_cuda = use_cuda
 
         self.__init_workers()
 
     def __init_workers(self):
         self._workers = list()
         for wid in self.workerids:
-            self._workers.append(CustomWorker(wid, self._queue, self._results))
+            self._workers.append(CustomWorker(wid, self._queue, self._results, self.use_cuda))
 
 
     def start(self, xlist):
@@ -47,11 +48,12 @@ class Scheduler:
         return networks, returns
 
 class CustomWorker(Process):
-    def __init__(self, workerid, queue, resultq):
+    def __init__(self, workerid, queue, resultq, use_cuda):
         Process.__init__(self, name='ModelProcessor')
         self.workerid = workerid
         self.queue = queue
         self.resultq = resultq
+        self.use_cuda = use_cuda
         from torchvision import datasets, transforms
         import torch.utils as utils
 
@@ -81,7 +83,7 @@ class CustomWorker(Process):
                 self.queue.put(None) # for other workers to consume it.
                 break
             # net = net_builder.randomize_network(bounded=False)
-            xnet  = torch_models.CustomModel(net)
+            xnet  = torch_models.CustomModel(net, self.use_cuda)
             ret = xnet.train(self.train_loader)
             score = -1
             if ret ==1:

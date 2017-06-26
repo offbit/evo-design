@@ -13,21 +13,22 @@ from worker import CustomWorker, Scheduler
 class TournamentOptimizer:
     """Define a tournament play selection process."""
 
-    def __init__(self, population_sz, init_fn, mutate_fn, eval_fn, nb_workers=2):
+    def __init__(self, population_sz, init_fn, mutate_fn, nb_workers=2, use_cuda=True):
         """
         Initialize optimizer.
 
             params::
-                eval_fn: evaluator fn.
+                
                 init_fn: initialize a model
                 mutate_fn: mutate function - mutates a model
                 eval_fn: evaluate function - evaluates the fitness of a model
                 nb_workers: number of workers
         """
-        self.eval_fn = eval_fn
+        
         self.init_fn = init_fn
         self.mutate_fn = mutate_fn
         self.nb_workers = nb_workers
+        self.use_cuda = use_cuda
         
         # population
         self.population_sz = population_sz
@@ -67,7 +68,7 @@ class TournamentOptimizer:
         # third p*((1-p)^2)
         # etc...
         p = 0.85 # winner probability 
-        tournament_size = 2
+        tournament_size = 3
         probs = [p*((1-p)**i) for i in range(tournament_size-1)]
         # a little trick to certify that probs is adding up to 1.0
         probs.append(1-np.sum(probs))
@@ -90,12 +91,11 @@ class TournamentOptimizer:
 
     def evaluate(self):
         """evaluate the models."""
-        # if self.nb_workers > 1:
+        
         workerids = range(self.nb_workers)
-        workerpool = Scheduler(workerids)
+        workerpool = Scheduler(workerids, self.use_cuda )
         self.population, returns = workerpool.start(self.population)
-        # else:
-        #     returns = [self.eval_fn(p) for p in self.population]
+
         self.evaluations = returns
         self.stats.append(copy.deepcopy(returns))
         self.history.append(copy.deepcopy(self.population)) 
