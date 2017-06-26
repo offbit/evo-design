@@ -7,7 +7,8 @@ from operator import itemgetter
 import torch.multiprocessing as mp
 from net_builder import randomize_network
 import copy
-
+from worker import CustomWorker, Scheduler
+        
 
 class TournamentOptimizer:
     """Define a tournament play selection process."""
@@ -41,7 +42,7 @@ class TournamentOptimizer:
     def step(self):
         """Tournament evolution step."""
         print('\nPopulation sample:')
-        for i in range(0,self.population_sz,5):
+        for i in range(0,self.population_sz,2):
             print(self.population[i]['nb_layers'],
                   self.population[i]['layers'][0]['nb_units'])
         self.evaluate()
@@ -66,7 +67,7 @@ class TournamentOptimizer:
         # third p*((1-p)^2)
         # etc...
         p = 0.85 # winner probability 
-        tournament_size = 3
+        tournament_size = 2
         probs = [p*((1-p)**i) for i in range(tournament_size-1)]
         # a little trick to certify that probs is adding up to 1.0
         probs.append(1-np.sum(probs))
@@ -83,17 +84,18 @@ class TournamentOptimizer:
             children.append(model)
 
         self.population = children
-        #
+        
         # if we want to do a completely completely random search per epoch
         # self.population = [randomize_network(bounded=False) for i in range(self.population_sz) ]
 
     def evaluate(self):
         """evaluate the models."""
-        if self.nb_workers > 1:
-            pool = mp.Pool(processes=self.nb_workers)
-            returns = pool.map(self.eval_fn, self.population)
-        else:
-            returns = [self.eval_fn(p) for p in self.population]
+        # if self.nb_workers > 1:
+        workerids = range(self.nb_workers)
+        workerpool = Scheduler(workerids)
+        self.population, returns = workerpool.start(self.population)
+        # else:
+        #     returns = [self.eval_fn(p) for p in self.population]
         self.evaluations = returns
         self.stats.append(copy.deepcopy(returns))
         self.history.append(copy.deepcopy(self.population)) 
