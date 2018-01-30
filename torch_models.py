@@ -70,21 +70,21 @@ class CustomModel():
         
         if build_info['optimizer']['val'] == 'adam':
             optimizer = optim.Adam(self.model.parameters(),
-                                lr=build_info['weight_decay']['val'],
+                                lr=build_info['lr']['val'],
                                 weight_decay=build_info['weight_decay']['val'])
 
         elif build_info['optimizer']['val'] == 'adadelta':
             optimizer = optim.Adadelta(self.model.parameters(),
-                                    lr=build_info['weight_decay']['val'],
+                                    lr=build_info['lr']['val'],
                                     weight_decay=build_info['weight_decay']['val'])
 
         elif build_info['optimizer']['val'] == 'rmsprop':
             optimizer = optim.RMSprop(self.model.parameters(),
-                                    lr=build_info['weight_decay']['val'],
+                                    lr=build_info['lr']['val'],
                                     weight_decay=build_info['weight_decay']['val'])
         else:
             optimizer = optim.SGD(self.model.parameters(),
-                                lr=build_info['weight_decay']['val'],
+                                lr=build_info['lr']['val'],
                                 weight_decay=build_info['weight_decay']['val'],
                                 momentum=0.9)
         self.optimizer = optimizer
